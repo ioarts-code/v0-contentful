@@ -128,7 +128,14 @@ export default async function Page() {
             slug={heroPost.slug}
             excerpt={heroPost.excerpt || ""}
           />
-          <MoreStories morePosts={morePosts} />
+          <MoreStories 
+            morePosts={morePosts.map(post => ({
+              ...post,
+              coverImage: post.image,
+              date: post.date || post.sys?.publishedAt,
+              excerpt: post.excerpt || ""
+            }))} 
+          />
         </>
       )}
     </div>

@@ -30,6 +30,11 @@ export default async function PostPage({ params }: any) {
     );
   }
 
+  const mappedMorePosts = morePosts.map((post: any) => ({
+    ...post,
+    coverImage: post.image,
+  }));
+
   return (
     <div className="container mx-auto px-5">
       <h2 className="mb-20 mt-8 text-2xl font-bold leading-tight tracking-tight md:text-4xl md:tracking-tighter">
@@ -42,27 +47,35 @@ export default async function PostPage({ params }: any) {
         <h1 className="mb-12 text-center text-6xl font-bold leading-tight tracking-tighter md:text-left md:text-7xl md:leading-none lg:text-8xl">
           {post.title}
         </h1>
-        <div className="hidden md:mb-12 md:block">
-          {post.author && (
-            <Avatar name={post.author.name} picture={post.author.picture} />
-          )}
-        </div>
-        {post.coverImage?.url && (
+        
+        {post.image?.url && (
           <div className="mb-8 sm:mx-0 md:mb-16">
-            <CoverImage title={post.title} url={post.coverImage.url} />
+            <CoverImage title={post.title} url={post.image.url} />
           </div>
         )}
+        
         <div className="mx-auto max-w-2xl">
-          <div className="mb-6 block md:hidden">
-            {post.author && (
-              <Avatar name={post.author.name} picture={post.author.picture} />
-            )}
-          </div>
-          {post.date && (
-            <div className="mb-6 text-lg">
-              <Date dateString={post.date} />
+          {post.author && (
+            <div className="mb-6 text-lg font-semibold">
+              By {post.author}
             </div>
           )}
+          
+          {post.sys?.publishedAt && (
+            <div className="mb-6 text-lg text-gray-600">
+              <Date dateString={post.sys.publishedAt} />
+            </div>
+          )}
+          
+          {post.price !== undefined && post.price !== null && (
+            <div className="mb-6 text-2xl font-bold text-blue-600">
+              ${post.price}
+            </div>
+          )}
+          
+          <div className="mb-6 text-sm text-gray-500">
+            Slug: {post.slug}
+          </div>
         </div>
 
         {post.content && (
@@ -74,7 +87,7 @@ export default async function PostPage({ params }: any) {
         )}
       </article>
       <hr className="border-accent-2 mt-28 mb-24" />
-      <MoreStories morePosts={morePosts} />
+      <MoreStories morePosts={mappedMorePosts} />
     </div>
   );
 }
