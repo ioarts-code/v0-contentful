@@ -72,7 +72,7 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.3.3)
       tw-animate-css:
-        specifier: latest
+        specifier: 1.4.0
         version: 1.4.0
       typescript:
         specifier: ^5.1.6
