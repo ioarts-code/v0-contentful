@@ -41,6 +41,11 @@ You need to create a content type called **"Blog Post"** (API identifier: `blogP
    - Required: Yes
    - Accept only specified entry type: Author
 
+8. **Categories** (Reference - Multiple entries)
+   - Field ID: `categories`
+   - Required: No
+   - Accept only specified entry type: Category
+
 ## Author Content Type
 
 Create another content type called **"Author"** (API identifier: `author`):
@@ -54,16 +59,26 @@ Create another content type called **"Author"** (API identifier: `author`):
    - Required: No
    - Accepted files: Images only
 
+## Category Content Type
+
+Create another content type called **"Category"** (API identifier: `category`):
+
+1. **Title** (Short text)
+   - Field ID: `title`
+   - Required: Yes
+
 ## Steps to Set Up:
 
 1. Go to your Contentful space: https://app.contentful.com/spaces/vadm9ymt179e
 2. Navigate to Content model in the top navigation
 3. Click "Add content type" and create the "Author" content type first
 4. Add the fields as specified above for Author
-5. Click "Add content type" again and create the "Blog Post" content type
-6. Add all the fields as specified above for Blog Post
-7. Save and publish your content model
-8. Add some sample content to test
+5. Click "Add content type" again and create the "Category" content type
+6. Add the fields as specified above for Category
+7. Click "Add content type" again and create the "Blog Post" content type
+8. Add all the fields as specified above for Blog Post
+9. Save and publish your content model
+10. Add some sample content to test
 
 ## Alternative: Using Existing Content Type
 

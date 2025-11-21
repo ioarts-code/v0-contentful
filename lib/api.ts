@@ -8,44 +8,52 @@ const POST_GRAPHQL_FIELDS = `
   image {
     url
   }
-  price
   author
-`;
+  price
+  description
+  categories
+`
 
 async function fetchGraphQL(query: string, preview = false): Promise<any> {
-  const response = await fetch(
-    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${
-          preview
-            ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
-            : process.env.CONTENTFUL_ACCESS_TOKEN
-        }`,
-      },
-      body: JSON.stringify({ query }),
-      next: { tags: ["posts"] },
+  const response = await fetch(`https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${
+        preview ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN : process.env.CONTENTFUL_ACCESS_TOKEN
+      }`,
     },
-  );
-  
-  const result = await response.json();
-  
+    body: JSON.stringify({ query }),
+    next: { tags: ["posts"] },
+  })
+
+  const result = await response.json()
+
   if (result?.errors) {
-    console.error("[v0] Contentful GraphQL Error Details:");
-    console.error(JSON.stringify(result.errors, null, 2));
+    console.error("[v0] Contentful GraphQL Error Details:")
+    console.error(JSON.stringify(result.errors, null, 2))
+
+    const hasUnresolvableLink = result.errors.some(
+      (error: any) => error.extensions?.contentful?.code === "UNRESOLVABLE_LINK",
+    )
+
+    // If it's an unresolvable link error, we can still return partial data
+    // Otherwise throw the error
+    if (!hasUnresolvableLink) {
+      throw new Error(`GraphQL Error: ${result.errors[0].message}`)
+    }
   }
-  
-  return result;
+
+  return result
 }
 
 function extractPost(fetchResponse: any): any {
-  return fetchResponse?.data?.titleCollection?.items?.[0] ?? null;
+  return fetchResponse?.data?.titleCollection?.items?.[0] ?? null
 }
 
 function extractPostEntries(fetchResponse: any): any[] {
-  return fetchResponse?.data?.titleCollection?.items ?? [];
+  const items = fetchResponse?.data?.titleCollection?.items ?? []
+  return items.filter((item: any) => item !== null)
 }
 
 export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
@@ -58,42 +66,35 @@ export async function getPreviewPostBySlug(slug: string | null): Promise<any> {
       }
     }`,
     true,
-  );
-  return extractPost(entry);
+  )
+  return extractPost(entry)
 }
 
 export async function getAllPosts(isDraftMode: boolean): Promise<any[]> {
   const entries = await fetchGraphQL(
     `query {
-      titleCollection(where: { slug_exists: true }, order: title_DESC, preview: ${
-        isDraftMode ? "true" : "false"
-      }) {
+      titleCollection(where: { slug_exists: true }, order: title_DESC, preview: ${isDraftMode ? "true" : "false"}) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
       }
     }`,
     isDraftMode,
-  );
-  return extractPostEntries(entries);
+  )
+  return extractPostEntries(entries)
 }
 
-export async function getPostAndMorePosts(
-  slug: string,
-  preview: boolean,
-): Promise<any> {
+export async function getPostAndMorePosts(slug: string, preview: boolean): Promise<any> {
   const entry = await fetchGraphQL(
     `query {
-      titleCollection(where: { slug: "${slug}" }, preview: ${
-        preview ? "true" : "false"
-      }, limit: 1) {
+      titleCollection(where: { slug: "${slug}" }, preview: ${preview ? "true" : "false"}, limit: 1) {
         items {
           ${POST_GRAPHQL_FIELDS}
         }
       }
     }`,
     preview,
-  );
+  )
   const entries = await fetchGraphQL(
     `query {
       titleCollection(where: { slug_not_in: "${slug}" }, order: title_DESC, preview: ${
@@ -105,9 +106,9 @@ export async function getPostAndMorePosts(
       }
     }`,
     preview,
-  );
+  )
   return {
     post: extractPost(entry),
     morePosts: extractPostEntries(entries),
-  };
+  }
 }
